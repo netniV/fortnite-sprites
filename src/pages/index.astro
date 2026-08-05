@@ -107,9 +107,10 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
         <div class="filter-row" id="collection-filters" aria-label="Collection status">
           <span class="filter-label">Show</span>
           <button class="filter-chip is-active" type="button" data-status="all" aria-pressed="true">All</button>
-          <button class="filter-chip" type="button" data-status="owned" aria-pressed="false">Owned</button>
-          <button class="filter-chip" type="button" data-status="missing" aria-pressed="false">Missing</button>
-          <button class="filter-chip" type="button" data-status="mastered" aria-pressed="false">Mastered</button>
+          <button class="filter-chip" type="button" data-status="owned" aria-pressed="false">Owned <span class="filter-count" id="filter-owned-count">0</span></button>
+          <button class="filter-chip" type="button" data-status="not-owned" aria-pressed="false">Not owned <span class="filter-count" id="filter-not-owned-count">{released.length}</span></button>
+          <button class="filter-chip" type="button" data-status="mastered" aria-pressed="false">Mastered <span class="filter-count" id="filter-mastered-count">0</span></button>
+          <button class="filter-chip" type="button" data-status="not-mastered" aria-pressed="false">Not mastered <span class="filter-count" id="filter-not-mastered-count">0</span></button>
         </div>
         <div class="filter-row" id="comparison-filters" aria-label="Comparison status" hidden>
           <span class="filter-label">Show</span>

@@ -169,11 +169,16 @@ function updateCard(card: HTMLElement): void {
 function updateSummary(): void {
   const ownedCount = [...owned].filter((id) => releasedIds.has(id)).length;
   const masteredCount = [...mastered].filter((id) => releasedIds.has(id)).length;
+  const notMasteredCount = [...owned].filter((id) => releasedIds.has(id) && !mastered.has(id)).length;
   const total = releasedIds.size;
   const percent = total ? Math.round((ownedCount / total) * 100) : 0;
   must("#owned-count").textContent = String(ownedCount);
   must("#mastered-count").textContent = String(masteredCount);
   must("#missing-count").textContent = String(total - ownedCount);
+  must("#filter-owned-count").textContent = String(ownedCount);
+  must("#filter-mastered-count").textContent = String(masteredCount);
+  must("#filter-not-owned-count").textContent = String(total - ownedCount);
+  must("#filter-not-mastered-count").textContent = String(notMasteredCount);
   must("#progress-percent").textContent = String(percent) + "%";
   must<HTMLElement>("#progress-bar").style.width = String(percent) + "%";
   must<HTMLElement>("#progress-ring").style.setProperty("--progress", String(percent * 3.6) + "deg");
@@ -206,8 +211,9 @@ function matchesFilters(card: HTMLElement): boolean {
     if (activeComparison === "neither" && (isOwned || theirs || isUnreleased)) return false;
   } else {
     if (activeStatus === "owned" && !isOwned) return false;
-    if (activeStatus === "missing" && (isOwned || isUnreleased)) return false;
+    if (activeStatus === "not-owned" && (isOwned || isUnreleased)) return false;
     if (activeStatus === "mastered" && !isMastered) return false;
+    if (activeStatus === "not-mastered" && (!isOwned || isMastered || isUnreleased)) return false;
   }
   return true;
 }
