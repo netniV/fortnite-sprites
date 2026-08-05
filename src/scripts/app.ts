@@ -161,8 +161,14 @@ function updateCard(card: HTMLElement): void {
     ownedLabel.textContent = isMastered ? "Owned · mastered" : isOwned ? "Owned" : "Missing";
   }
   if (ownerRow) ownerRow.hidden = !shared;
-  if (meMarker) meMarker.classList.toggle("has-it", isOwned);
-  if (themMarker) themMarker.classList.toggle("has-it", Boolean(shared?.owned.has(id)));
+  if (meMarker) {
+    meMarker.classList.toggle("has-it", isOwned);
+    meMarker.classList.toggle("is-mastered", isMastered);
+  }
+  if (themMarker) {
+    themMarker.classList.toggle("has-it", Boolean(shared?.owned.has(id)));
+    themMarker.classList.toggle("is-mastered", Boolean(shared?.mastered.has(id)));
+  }
   if (themName) themName.textContent = shared?.name || "Them";
 }
 
