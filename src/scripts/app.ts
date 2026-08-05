@@ -1,7 +1,9 @@
 type SavedCollection = { owned?: number[]; mastered?: number[]; name?: string };
 type SharedCollection = { owned: Set<number>; mastered: Set<number>; name: string };
+type ViewMode = "cards" | "table";
 
 const STORAGE_KEY = "fortnite-sprites-collection-v1";
+const VIEW_STORAGE_KEY = "fortnite-sprites-view-v1";
 
 function must<T extends Element>(selector: string): T {
   const element = document.querySelector<T>(selector);
@@ -30,6 +32,30 @@ const shareNameInput = must<HTMLInputElement>("#share-name");
 const shareUrlInput = must<HTMLInputElement>("#share-url");
 const compareUrlInput = must<HTMLTextAreaElement>("#compare-url");
 const compareError = must<HTMLElement>("#compare-error");
+const spriteGrid = must<HTMLElement>("#sprite-grid");
+
+function loadView(): ViewMode {
+  try {
+    return localStorage.getItem(VIEW_STORAGE_KEY) === "table" ? "table" : "cards";
+  } catch {
+    return "cards";
+  }
+}
+
+function setView(view: ViewMode, persist = true): void {
+  const isTable = view === "table";
+  spriteGrid.classList.toggle("is-table", isTable);
+  spriteGrid.dataset.view = view;
+  must("#item-view-label").textContent = isTable ? "row" : "card";
+  document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((button) => {
+    const active = button.dataset.view === view;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  if (persist) {
+    try { localStorage.setItem(VIEW_STORAGE_KEY, view) } catch { /* Preference is optional. */ }
+  }
+}
 
 function cleanIds(values: unknown): number[] {
   if (!Array.isArray(values)) return [];
@@ -243,6 +269,7 @@ async function copyText(text: string): Promise<void> {
 
 const saved = loadSavedCollection();
 shareNameInput.value = typeof saved.name === "string" ? saved.name.slice(0, 32) : "";
+setView(loadView(), false);
 const initialShared = parseSharedLink(location.hash);
 if (initialShared) setShared(initialShared, false);
 else render();
@@ -309,6 +336,10 @@ document.querySelectorAll<HTMLButtonElement>(".variant-chip[data-variant]").forE
     });
     applyFilters();
   });
+});
+
+document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((button) => {
+  button.addEventListener("click", () => setView(button.dataset.view === "table" ? "table" : "cards"));
 });
 
 must<HTMLButtonElement>("#open-share").addEventListener("click", () => {

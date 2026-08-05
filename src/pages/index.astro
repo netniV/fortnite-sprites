@@ -132,11 +132,24 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
       </div>
 
       <div class="results-heading">
-        <div><h2>All sprites</h2><p><span id="visible-count">{released.length}</span> shown · click a card to mark it owned</p></div>
-        <span class="autosave-note"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>Changes save automatically</span>
+        <div><h2>All sprites</h2><p><span id="visible-count">{released.length}</span> shown · click a <span id="item-view-label">card</span> to mark it owned</p></div>
+        <div class="results-actions">
+          <span class="autosave-note"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>Changes save automatically</span>
+          <div class="view-switcher" role="group" aria-label="Sprite view">
+            <button class="view-button is-active" type="button" data-view="cards" aria-pressed="true" aria-label="Card view" title="Card view">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </button>
+            <button class="view-button" type="button" data-view="table" aria-pressed="false" aria-label="Table view" title="Table view">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M8 4v16"/></svg>
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="sprite-grid" id="sprite-grid" data-testid="sprite-grid">
+        <div class="table-view-head" aria-hidden="true">
+          <span>Sprite</span><span>Variant</span><span>Collector rate</span><span>Status</span><span>Mastery</span>
+        </div>
         {sprites.map((sprite) => (
           <article
             class={"sprite-card rarity-" + sprite.rarity}
