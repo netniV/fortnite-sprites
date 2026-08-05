@@ -197,11 +197,18 @@ function updateSummary(): void {
   if (shared) {
     const theirCount = [...shared.owned].filter((id) => releasedIds.has(id)).length;
     const both = [...owned].filter((id) => shared?.owned.has(id)).length;
-    const unique = new Set([...owned, ...shared.owned]).size - both;
+    const mineOnly = ownedCount - both;
+    const theirsOnly = theirCount - both;
+    const unique = mineOnly + theirsOnly;
+    const neither = total - both - unique;
     must("#comparison-mine").textContent = String(ownedCount);
     must("#comparison-theirs").textContent = String(theirCount);
     must("#comparison-both").textContent = String(both);
     must("#comparison-unique").textContent = String(unique);
+    must("#filter-comparison-both-count").textContent = String(both);
+    must("#filter-comparison-mine-only-count").textContent = String(mineOnly);
+    must("#filter-comparison-theirs-only-count").textContent = String(theirsOnly);
+    must("#filter-comparison-neither-count").textContent = String(neither);
   }
 }
 

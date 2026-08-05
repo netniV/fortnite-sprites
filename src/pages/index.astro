@@ -115,10 +115,10 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
         <div class="filter-row" id="comparison-filters" aria-label="Comparison status" hidden>
           <span class="filter-label">Show</span>
           <button class="filter-chip is-active" type="button" data-comparison="all" aria-pressed="true">All</button>
-          <button class="filter-chip" type="button" data-comparison="both" aria-pressed="false">Both</button>
-          <button class="filter-chip" type="button" data-comparison="mine-only" aria-pressed="false">Only you</button>
-          <button class="filter-chip" type="button" data-comparison="theirs-only" aria-pressed="false">Only them</button>
-          <button class="filter-chip" type="button" data-comparison="neither" aria-pressed="false">Neither</button>
+          <button class="filter-chip" type="button" data-comparison="both" aria-pressed="false">Both <span class="filter-count" id="filter-comparison-both-count">0</span></button>
+          <button class="filter-chip" type="button" data-comparison="mine-only" aria-pressed="false">Only you <span class="filter-count" id="filter-comparison-mine-only-count">0</span></button>
+          <button class="filter-chip" type="button" data-comparison="theirs-only" aria-pressed="false">Only them <span class="filter-count" id="filter-comparison-theirs-only-count">0</span></button>
+          <button class="filter-chip" type="button" data-comparison="neither" aria-pressed="false">Neither <span class="filter-count" id="filter-comparison-neither-count">0</span></button>
         </div>
         <label class="switch-control"><input id="show-unreleased" type="checkbox" /><span></span>Preview unreleased</label>
       </div>
