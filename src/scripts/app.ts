@@ -145,6 +145,8 @@ function updateCard(card: HTMLElement): void {
   const isOwned = owned.has(id);
   const isMastered = mastered.has(id);
   const isUnreleased = card.dataset.unreleased === "true";
+  const friendOwns = Boolean(shared?.owned.has(id));
+  const friendMastered = Boolean(shared?.mastered.has(id));
   const ownedButton = card.querySelector<HTMLButtonElement>('[data-action="owned"]');
   const masterButton = card.querySelector<HTMLButtonElement>('[data-action="mastered"]');
   const ownedLabel = card.querySelector<HTMLElement>(".owned-label");
@@ -155,6 +157,9 @@ function updateCard(card: HTMLElement): void {
 
   card.classList.toggle("is-owned", isOwned);
   card.classList.toggle("is-mastered", isMastered);
+  card.classList.toggle("is-comparing", Boolean(shared));
+  card.classList.toggle("friend-owned", friendOwns);
+  card.classList.toggle("friend-mastered", friendMastered);
   ownedButton?.setAttribute("aria-pressed", String(isOwned));
   masterButton?.setAttribute("aria-pressed", String(isMastered));
   if (ownedLabel && !isUnreleased) {
@@ -166,8 +171,8 @@ function updateCard(card: HTMLElement): void {
     meMarker.classList.toggle("is-mastered", isMastered);
   }
   if (themMarker) {
-    themMarker.classList.toggle("has-it", Boolean(shared?.owned.has(id)));
-    themMarker.classList.toggle("is-mastered", Boolean(shared?.mastered.has(id)));
+    themMarker.classList.toggle("has-it", friendOwns);
+    themMarker.classList.toggle("is-mastered", friendMastered);
   }
   if (themName) themName.textContent = shared?.name || "Them";
 }
@@ -309,16 +314,20 @@ else render();
 
 for (const card of cards) {
   card.addEventListener("click", (event) => {
-    const target = (event.target as Element).closest<HTMLButtonElement>("[data-action]");
-    if (!target || target.disabled) return;
+    const eventTarget = event.target as Element;
+    const target = eventTarget.closest<HTMLButtonElement>("[data-action]");
+    if (target?.disabled) return;
+    const isTableRowClick = spriteGrid.classList.contains("is-table") && !eventTarget.closest(".comparison-owners");
+    const action = target?.dataset.action ?? (isTableRowClick ? "owned" : null);
+    if (!action) return;
     const id = Number(card.dataset.id);
     if (!releasedIds.has(id)) return;
-    if (target.dataset.action === "owned") {
+    if (action === "owned") {
       if (owned.has(id)) {
         owned.delete(id);
         mastered.delete(id);
       } else owned.add(id);
-    } else if (target.dataset.action === "mastered") {
+    } else if (action === "mastered") {
       if (mastered.has(id)) mastered.delete(id);
       else {
         owned.add(id);
