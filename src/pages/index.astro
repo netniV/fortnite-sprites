@@ -161,6 +161,7 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
                   <img src={"/sprites/" + sprite.id + ".webp"} alt={sprite.name + " Sprite"} width="260" height="260" loading="lazy" decoding="async" />
                 )}
                 <span class="owned-check"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span>
+                <span class="mastered-check"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span>
                 {sprite.unreleased && <span class="unreleased-tag">Unreleased</span>}
               </span>
               <span class="sprite-info">
