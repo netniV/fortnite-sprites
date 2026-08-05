@@ -1,3 +1,5 @@
+import QRCode from "qrcode";
+
 type SavedCollection = { owned?: number[]; mastered?: number[]; name?: string };
 type SharedCollection = { owned: Set<number>; mastered: Set<number>; name: string };
 type ViewMode = "cards" | "table";
@@ -30,8 +32,13 @@ const shareDialog = must<HTMLDialogElement>("#share-dialog");
 const compareDialog = must<HTMLDialogElement>("#compare-dialog");
 const shareNameInput = must<HTMLInputElement>("#share-name");
 const shareUrlInput = must<HTMLInputElement>("#share-url");
+const shareQr = must<HTMLElement>("#share-qr");
+const shareQrCanvas = must<HTMLCanvasElement>("#share-qr-canvas");
 const compareUrlInput = must<HTMLTextAreaElement>("#compare-url");
 const compareError = must<HTMLElement>("#compare-error");
+const compareQrInput = must<HTMLInputElement>("#compare-qr");
+const compareQrDrop = must<HTMLElement>("#compare-qr-drop");
+const compareQrLabel = must<HTMLElement>("#compare-qr-label");
 const spriteGrid = must<HTMLElement>("#sprite-grid");
 const ownAllShownButton = must<HTMLButtonElement>("#own-all-shown");
 const masterAllShownButton = must<HTMLButtonElement>("#master-all-shown");
@@ -114,6 +121,25 @@ function buildShareUrl(): string {
   return url.toString();
 }
 
+async function updateShareLink(): Promise<void> {
+  const url = buildShareUrl();
+  shareUrlInput.value = url;
+  shareQr.hidden = false;
+  shareQr.setAttribute("aria-busy", "true");
+  try {
+    await QRCode.toCanvas(shareQrCanvas, url, {
+      width: 152,
+      margin: 2,
+      errorCorrectionLevel: "M",
+      color: { dark: "#06111f", light: "#ffffff" },
+    });
+  } catch {
+    shareQr.hidden = true;
+  } finally {
+    shareQr.removeAttribute("aria-busy");
+  }
+}
+
 function parseSharedLink(input: string): SharedCollection | null {
   try {
     let fragment = input.trim();
@@ -128,6 +154,60 @@ function parseSharedLink(input: string): SharedCollection | null {
     };
   } catch {
     return null;
+  }
+}
+
+async function decodeQrImage(file: File): Promise<string | null> {
+  const supportedTypes = ["image/png", "image/jpeg", "image/webp"];
+  if ((file.type && !supportedTypes.includes(file.type)) || file.size > 10 * 1024 * 1024) return null;
+  const { default: jsQR } = await import("jsqr");
+  const bitmap = await createImageBitmap(file);
+  try {
+    const scale = Math.min(1, 2048 / Math.max(bitmap.width, bitmap.height));
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return null;
+    context.drawImage(bitmap, 0, 0, width, height);
+    const image = context.getImageData(0, 0, width, height);
+    return jsQR(image.data, width, height, { inversionAttempts: "attemptBoth" })?.data ?? null;
+  } finally {
+    bitmap.close();
+  }
+}
+
+function loadSharedLink(input: string): boolean {
+  const parsed = parseSharedLink(input);
+  if (!parsed) return false;
+  compareError.hidden = true;
+  compareDialog.close();
+  setShared(parsed);
+  return true;
+}
+
+async function loadQrFile(file: File): Promise<void> {
+  compareError.hidden = true;
+  compareQrDrop.setAttribute("aria-busy", "true");
+  compareQrLabel.textContent = "Scanning QR…";
+  try {
+    const value = await decodeQrImage(file);
+    if (!value || !loadSharedLink(value)) {
+      compareError.textContent = "We couldn’t find a valid Fortnite Sprites QR code in that image.";
+      compareError.hidden = false;
+      return;
+    }
+    showToast("QR code scanned");
+  } catch {
+    compareError.textContent = "We couldn’t read that image. Try a clear PNG, JPG or WebP.";
+    compareError.hidden = false;
+  } finally {
+    compareQrDrop.removeAttribute("aria-busy");
+    compareQrDrop.classList.remove("is-dragging");
+    compareQrLabel.textContent = "Choose or drop a QR image";
+    compareQrInput.value = "";
   }
 }
 
@@ -412,33 +492,45 @@ ownAllShownButton.addEventListener("click", () => applyBulkAction("owned"));
 masterAllShownButton.addEventListener("click", () => applyBulkAction("mastered"));
 
 must<HTMLButtonElement>("#open-share").addEventListener("click", () => {
-  shareUrlInput.value = buildShareUrl();
+  void updateShareLink();
   shareDialog.showModal();
 });
 shareNameInput.addEventListener("input", () => {
-  shareUrlInput.value = buildShareUrl();
+  void updateShareLink();
   saveCollection();
 });
 must<HTMLButtonElement>("#copy-share").addEventListener("click", async () => {
-  shareUrlInput.value = buildShareUrl();
+  await updateShareLink();
   await copyText(shareUrlInput.value);
   showToast("Collection link copied");
 });
 must<HTMLButtonElement>("#open-compare").addEventListener("click", () => {
   compareUrlInput.value = "";
+  compareQrInput.value = "";
+  compareError.textContent = "That doesn’t look like a Fortnite Sprites collection link.";
   compareError.hidden = true;
   compareDialog.showModal();
 });
 must<HTMLButtonElement>("#load-comparison").addEventListener("click", () => {
-  const parsed = parseSharedLink(compareUrlInput.value);
-  if (!parsed) {
+  if (!loadSharedLink(compareUrlInput.value)) {
+    compareError.textContent = "That doesn’t look like a Fortnite Sprites collection link.";
     compareError.hidden = false;
     compareUrlInput.focus();
-    return;
   }
-  compareError.hidden = true;
-  compareDialog.close();
-  setShared(parsed);
+});
+compareQrInput.addEventListener("change", () => {
+  const file = compareQrInput.files?.[0];
+  if (file) void loadQrFile(file);
+});
+compareQrDrop.addEventListener("dragover", (event) => {
+  event.preventDefault();
+  compareQrDrop.classList.add("is-dragging");
+});
+compareQrDrop.addEventListener("dragleave", () => compareQrDrop.classList.remove("is-dragging"));
+compareQrDrop.addEventListener("drop", (event) => {
+  event.preventDefault();
+  const file = event.dataTransfer?.files[0];
+  if (file) void loadQrFile(file);
 });
 must<HTMLButtonElement>("#close-comparison").addEventListener("click", () => setShared(null));
 must<HTMLButtonElement>("#reset-collection").addEventListener("click", () => {
