@@ -134,6 +134,14 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
       <div class="results-heading">
         <div><h2>All sprites</h2><p><span id="visible-count">{released.length}</span> shown · click a <span id="item-view-label">card</span> to mark it owned</p></div>
         <div class="results-actions">
+          <div class="bulk-actions" role="group" aria-label="Bulk collection actions">
+            <button class="bulk-button" id="own-all-shown" type="button" data-testid="own-all-shown">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg><span>Own all shown</span>
+            </button>
+            <button class="bulk-button bulk-button-mastered" id="master-all-shown" type="button" data-testid="master-all-shown">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg><span>Master all shown</span>
+            </button>
+          </div>
           <span class="autosave-note"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>Changes save automatically</span>
           <div class="view-switcher" role="group" aria-label="Sprite view">
             <button class="view-button is-active" type="button" data-view="cards" aria-pressed="true" aria-label="Card view" title="Card view">

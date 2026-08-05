@@ -33,6 +33,8 @@ const shareUrlInput = must<HTMLInputElement>("#share-url");
 const compareUrlInput = must<HTMLTextAreaElement>("#compare-url");
 const compareError = must<HTMLElement>("#compare-error");
 const spriteGrid = must<HTMLElement>("#sprite-grid");
+const ownAllShownButton = must<HTMLButtonElement>("#own-all-shown");
+const masterAllShownButton = must<HTMLButtonElement>("#master-all-shown");
 
 function loadView(): ViewMode {
   try {
@@ -210,15 +212,34 @@ function matchesFilters(card: HTMLElement): boolean {
   return true;
 }
 
+function updateBulkActions(filteredReleasedCards: HTMLElement[]): void {
+  const ownable = filteredReleasedCards.filter((card) => !owned.has(Number(card.dataset.id))).length;
+  const masterable = filteredReleasedCards.filter((card) => !mastered.has(Number(card.dataset.id))).length;
+
+  ownAllShownButton.disabled = ownable === 0;
+  masterAllShownButton.disabled = masterable === 0;
+  ownAllShownButton.title = ownable
+    ? `Mark ${ownable} shown ${ownable === 1 ? "Sprite" : "Sprites"} as owned`
+    : "All shown released Sprites are already owned";
+  masterAllShownButton.title = masterable
+    ? `Mark ${masterable} shown ${masterable === 1 ? "Sprite" : "Sprites"} as mastered`
+    : "All shown released Sprites are already mastered";
+}
+
 function applyFilters(): void {
   let visible = 0;
+  const filteredReleasedCards: HTMLElement[] = [];
   for (const card of cards) {
     const matches = matchesFilters(card);
     card.hidden = !matches;
-    if (matches) visible += 1;
+    if (matches) {
+      visible += 1;
+      if (releasedIds.has(Number(card.dataset.id))) filteredReleasedCards.push(card);
+    }
   }
   must("#visible-count").textContent = String(visible);
   must<HTMLElement>("#empty-state").hidden = visible !== 0;
+  updateBulkActions(filteredReleasedCards);
 }
 
 function render(): void {
@@ -341,6 +362,26 @@ document.querySelectorAll<HTMLButtonElement>(".variant-chip[data-variant]").forE
 document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((button) => {
   button.addEventListener("click", () => setView(button.dataset.view === "table" ? "table" : "cards"));
 });
+
+function applyBulkAction(action: "owned" | "mastered"): void {
+  const filteredIds = cards
+    .filter((card) => matchesFilters(card))
+    .map((card) => Number(card.dataset.id))
+    .filter((id) => releasedIds.has(id));
+  const changedIds = filteredIds.filter((id) => action === "owned" ? !owned.has(id) : !mastered.has(id));
+  if (!changedIds.length) return;
+
+  for (const id of changedIds) {
+    owned.add(id);
+    if (action === "mastered") mastered.add(id);
+  }
+  render();
+  const state = action === "owned" ? "owned" : "mastered";
+  showToast(`${changedIds.length} ${changedIds.length === 1 ? "Sprite" : "Sprites"} marked ${state}`);
+}
+
+ownAllShownButton.addEventListener("click", () => applyBulkAction("owned"));
+masterAllShownButton.addEventListener("click", () => applyBulkAction("mastered"));
 
 must<HTMLButtonElement>("#open-share").addEventListener("click", () => {
   shareUrlInput.value = buildShareUrl();
