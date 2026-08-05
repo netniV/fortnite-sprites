@@ -1,0 +1,230 @@
+---
+import Layout from "../layouts/Layout.astro";
+import catalog from "../data/sprites.json";
+
+const variantOrder = ["base", "cube", "gold", "quack", "gummy", "galaxy", "gem", "holofoil"];
+const variantLabels: Record<string, string> = {
+  base: "Base",
+  gold: "Gold",
+  gummy: "Gummy",
+  galaxy: "Galaxy",
+  gem: "Gem",
+  holofoil: "Holofoil",
+  cube: "Cube",
+  quack: "Quack",
+};
+const sprites = catalog.map((sprite) => ({
+  ...sprite,
+  variant: sprite.variant === "candy" ? "gummy" : sprite.variant,
+})).sort((a, b) =>
+  a.base.localeCompare(b.base) ||
+  variantOrder.indexOf(a.variant) - variantOrder.indexOf(b.variant)
+);
+const released = sprites.filter((sprite) => !sprite.unreleased);
+const variants = variantOrder.filter((variant) => sprites.some((sprite) => sprite.variant === variant));
+const showcase = ["Water", "Gold Peely", "Galaxy Batman"]
+  .map((name) => released.find((sprite) => sprite.name === name))
+  .filter(Boolean) as typeof released;
+const logoSprite = released.find((sprite) => sprite.name === "Water") ?? released[0];
+---
+
+<Layout>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Sprite Sync home">
+      <span class="brand-mark"><img src={"/sprites/" + logoSprite.id + ".webp"} alt="" width="44" height="44" /></span>
+      <span><strong>Sprite Sync</strong><small>Fortnite collection tracker</small></span>
+    </a>
+    <nav class="header-actions" aria-label="Collection actions">
+      <button class="button button-ghost" id="open-compare" type="button" data-testid="open-compare">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 7h11m0 0-3-3m3 3-3 3M16 17H5m0 0 3 3m-3-3 3-3"/></svg><span>Compare</span>
+      </button>
+      <button class="button button-primary" id="open-share" type="button" data-testid="open-share">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"/></svg><span>Share collection</span>
+      </button>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span> Your sprite squad, in sync</p>
+        <h1>Collect. Compare.<br /><em>Complete the set.</em></h1>
+        <p class="hero-description">Tick off every Sprite you own, mark your mastered favourites, then send one link to compare collections with friends.</p>
+        <div class="hero-points" aria-label="Key features">
+          <span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg> Saved on this device</span>
+          <span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg> No account needed</span>
+          <span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7h10v10H7z"/><path d="M4 4h10M4 4v10M20 20H10M20 20V10"/></svg> Side-by-side links</span>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+        {showcase.map((sprite, index) => (
+          <div class={"showcase-sprite showcase-" + (index + 1)}>
+            <span>{sprite.name}</span>
+            <img src={"/sprites/" + sprite.id + ".webp"} alt="" width="250" height="250" />
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="dashboard" aria-labelledby="collection-heading">
+      <div class="summary-card">
+        <div class="progress-ring" id="progress-ring" style="--progress: 0deg"><div><strong id="progress-percent">0%</strong><span>complete</span></div></div>
+        <div class="summary-copy">
+          <span class="section-kicker">Collection progress</span>
+          <h2 id="collection-heading"><span id="owned-count">0</span> of {released.length} found</h2>
+          <div class="progress-track" aria-hidden="true"><span id="progress-bar"></span></div>
+          <div class="summary-stats">
+            <span><i class="dot dot-owned"></i><strong id="mastered-count">0</strong> mastered</span>
+            <span><i class="dot dot-missing"></i><strong id="missing-count">{released.length}</strong> missing</span>
+          </div>
+        </div>
+        <button class="text-button" id="reset-collection" type="button">Reset</button>
+      </div>
+
+      <aside class="comparison-panel" id="comparison-panel" hidden data-testid="comparison-panel">
+        <div class="comparison-heading">
+          <div><span class="section-kicker">Side-by-side comparison</span><h2>You &amp; <span id="comparison-name">Friend</span></h2></div>
+          <button class="icon-button" id="close-comparison" type="button" aria-label="Close comparison">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+        <div class="comparison-stats">
+          <div><span>You own</span><strong id="comparison-mine">0</strong></div>
+          <div><span>They own</span><strong id="comparison-theirs">0</strong></div>
+          <div class="highlight"><span>In common</span><strong id="comparison-both">0</strong></div>
+          <div><span>Unique between you</span><strong id="comparison-unique">0</strong></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="collection-surface">
+      <div class="collection-toolbar">
+        <div class="search-wrap">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>
+          <input id="search" type="search" placeholder="Search sprites…" autocomplete="off" data-testid="search" /><kbd>/</kbd>
+        </div>
+        <div class="filter-row" id="collection-filters" aria-label="Collection status">
+          <span class="filter-label">Show</span>
+          <button class="filter-chip is-active" type="button" data-status="all" aria-pressed="true">All</button>
+          <button class="filter-chip" type="button" data-status="owned" aria-pressed="false">Owned</button>
+          <button class="filter-chip" type="button" data-status="missing" aria-pressed="false">Missing</button>
+          <button class="filter-chip" type="button" data-status="mastered" aria-pressed="false">Mastered</button>
+        </div>
+        <div class="filter-row" id="comparison-filters" aria-label="Comparison status" hidden>
+          <span class="filter-label">Show</span>
+          <button class="filter-chip is-active" type="button" data-comparison="all" aria-pressed="true">All</button>
+          <button class="filter-chip" type="button" data-comparison="both" aria-pressed="false">Both</button>
+          <button class="filter-chip" type="button" data-comparison="mine-only" aria-pressed="false">Only you</button>
+          <button class="filter-chip" type="button" data-comparison="theirs-only" aria-pressed="false">Only them</button>
+          <button class="filter-chip" type="button" data-comparison="neither" aria-pressed="false">Neither</button>
+        </div>
+        <label class="switch-control"><input id="show-unreleased" type="checkbox" /><span></span>Preview unreleased</label>
+      </div>
+
+      <div class="variant-scroller" aria-label="Sprite variants">
+        <button class="variant-chip is-active" type="button" data-variant="all" aria-pressed="true"><span class="variant-swatch swatch-all"></span>All variants</button>
+        {variants.map((variant) => (
+          <button class="variant-chip" type="button" data-variant={variant} aria-pressed="false">
+            <span class={"variant-swatch swatch-" + variant}></span>{variantLabels[variant]}
+          </button>
+        ))}
+      </div>
+
+      <div class="results-heading">
+        <div><h2>All sprites</h2><p><span id="visible-count">{released.length}</span> shown · click a card to mark it owned</p></div>
+        <span class="autosave-note"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>Changes save automatically</span>
+      </div>
+
+      <div class="sprite-grid" id="sprite-grid" data-testid="sprite-grid">
+        {sprites.map((sprite) => (
+          <article
+            class={"sprite-card rarity-" + sprite.rarity}
+            data-id={sprite.id}
+            data-name={(sprite.name + " " + sprite.base).toLowerCase()}
+            data-variant={sprite.variant}
+            data-unreleased={String(sprite.unreleased)}
+            hidden={sprite.unreleased}
+          >
+            <button
+              class="sprite-main"
+              type="button"
+              data-action="owned"
+              aria-pressed="false"
+              aria-label={sprite.unreleased ? sprite.name + " is unreleased" : "Mark " + sprite.name + " as owned"}
+              disabled={sprite.unreleased}
+            >
+              <span class="sprite-art">
+                {sprite.unreleased ? (
+                  <span class="coming-soon-art"><b>?</b><small>Coming soon</small></span>
+                ) : (
+                  <img src={"/sprites/" + sprite.id + ".webp"} alt={sprite.name + " Sprite"} width="260" height="260" loading="lazy" decoding="async" />
+                )}
+                <span class="owned-check"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span>
+                {sprite.unreleased && <span class="unreleased-tag">Unreleased</span>}
+              </span>
+              <span class="sprite-info">
+                <span class="sprite-name">{sprite.name}</span>
+                <span class="sprite-meta">
+                  <span class={"variant-label variant-" + sprite.variant}>{variantLabels[sprite.variant]}</span>
+                  <span>{sprite.unlockRate || "—"} collectors</span>
+                </span>
+              </span>
+            </button>
+            <div class="comparison-owners" hidden>
+              <span class="owner-state owner-me"><i></i>You</span>
+              <span class="owner-state owner-them"><i></i><b>Them</b></span>
+            </div>
+            <div class="card-actions">
+              <span class="owned-label">{sprite.unreleased ? "Not yet available" : "Missing"}</span>
+              <button class="master-button" type="button" data-action="mastered" aria-pressed="false" aria-label={"Mark " + sprite.name + " as mastered"} disabled={sprite.unreleased}>
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>Mastered
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+      <div class="empty-state" id="empty-state" hidden>
+        <span>✦</span><h3>No sprites found</h3><p>Try a different search or filter.</p>
+        <button class="button button-ghost" id="clear-filters" type="button">Clear filters</button>
+      </div>
+    </section>
+
+    <footer>
+      <p>Catalog and artwork sourced from <a href="https://fortnite.gg/sprites" target="_blank" rel="noreferrer">Fortnite.GG</a>. Updated 4 August 2026.</p>
+      <p>Fan-made collection tool · Not affiliated with Epic Games</p>
+    </footer>
+  </main>
+
+  <dialog id="share-dialog">
+    <form method="dialog" class="modal-shell">
+      <div class="modal-icon"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"/></svg></div>
+      <button class="modal-close" value="cancel" aria-label="Close share dialog"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+      <span class="section-kicker">Share collection</span><h2>Send your sprite lineup</h2>
+      <p class="modal-description">Anyone with this link can compare your selection against the collection saved on their device.</p>
+      <label class="field-label" for="share-name">Your display name</label>
+      <input class="field-input" id="share-name" maxlength="32" placeholder="e.g. Jonesy" />
+      <label class="field-label" for="share-url">Shareable link</label>
+      <div class="copy-field"><input id="share-url" readonly /><button class="button button-primary" id="copy-share" type="button">Copy link</button></div>
+      <p class="privacy-note"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>The link contains sprite IDs only—no account or personal data.</p>
+    </form>
+  </dialog>
+
+  <dialog id="compare-dialog">
+    <form method="dialog" class="modal-shell">
+      <div class="modal-icon modal-icon-purple"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 7h11m0 0-3-3m3 3-3 3M16 17H5m0 0 3 3m-3-3 3-3"/></svg></div>
+      <button class="modal-close" value="cancel" aria-label="Close comparison dialog"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+      <span class="section-kicker">Compare collections</span><h2>Paste a friend’s link</h2>
+      <p class="modal-description">Their collection stays read-only. Your own ticks remain editable and saved here.</p>
+      <label class="field-label" for="compare-url">Sprite Sync link</label>
+      <textarea class="field-input" id="compare-url" rows="3" placeholder="https://…#c=…"></textarea>
+      <p class="field-error" id="compare-error" hidden>That doesn’t look like a Sprite Sync collection link.</p>
+      <button class="button button-primary button-wide" id="load-comparison" type="button">Compare collections</button>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg><span>Copied to clipboard</span>
+  </div>
+  <script src="../scripts/app.ts"></script>
+</Layout>
