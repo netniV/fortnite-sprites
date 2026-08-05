@@ -45,7 +45,14 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
   </header>
 
   <main class="page-shell">
-    <section class="hero">
+    <div class="intro-controls" id="intro-controls">
+      <button class="intro-toggle" id="intro-toggle" type="button" aria-controls="intro-section" aria-expanded="true">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 14 6-6 6 6" /></svg>
+        <span>Hide intro</span>
+      </button>
+    </div>
+
+    <section class="hero" id="intro-section">
       <div class="hero-copy">
         <p class="eyebrow"><span></span> Your sprite squad, in sync</p>
         <h1>Collect. Compare.<br /><em>Complete the set.</em></h1>
@@ -98,7 +105,7 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
       </aside>
     </section>
 
-    <section class="collection-surface">
+    <section class="collection-surface" id="filters">
       <div class="collection-toolbar">
         <div class="search-wrap">
           <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>
@@ -155,9 +162,16 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
         </div>
       </div>
 
+      <div class="table-scroll-hint" id="table-scroll-hint" hidden>
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M8 9l-3 3 3 3m8-6 3 3-3 3" /></svg>
+        <span>Swipe left for <strong>collection controls</strong></span>
+      </div>
+
       <div class="sprite-grid" id="sprite-grid" data-testid="sprite-grid">
         <div class="table-view-head" aria-hidden="true">
-          <span>Sprite</span><span>Variant</span><span>Collector rate</span><span>Status</span><span>Mastery</span>
+          <span>Sprite</span><span class="table-variant-heading">Variant</span><span class="table-collector-heading">Collector rate</span>
+          <span><span class="table-heading-wide">Status</span><span class="table-heading-compact">Collection</span></span>
+          <span class="table-mastery-heading">Mastery</span>
         </div>
         {sprites.map((sprite) => (
           <article
@@ -192,7 +206,7 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
                 <span class="sprite-name">{sprite.name}</span>
                 <span class="sprite-meta">
                   <span class={"variant-label variant-" + sprite.variant}>{variantLabels[sprite.variant]}</span>
-                  <span>{sprite.unlockRate || "—"} collectors</span>
+                  <span class="collector-rate">{sprite.unlockRate || "—"} collectors</span>
                 </span>
               </span>
             </button>
@@ -220,6 +234,10 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
       <p>Fan-made collection tool · Not affiliated with Epic Games</p>
     </footer>
   </main>
+
+  <button class="back-to-top" id="back-to-top" type="button" aria-label="Back to filters" title="Back to filters" aria-hidden="true" tabindex="-1">
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 14 6-6 6 6" /></svg>
+  </button>
 
   <dialog id="share-dialog">
     <form method="dialog" class="modal-shell">

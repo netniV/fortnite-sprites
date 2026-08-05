@@ -6,6 +6,7 @@ type ViewMode = "cards" | "table";
 
 const STORAGE_KEY = "fortnite-sprites-collection-v1";
 const VIEW_STORAGE_KEY = "fortnite-sprites-view-v1";
+const INTRO_STORAGE_KEY = "fortnite-sprites-intro-v1";
 
 function must<T extends Element>(selector: string): T {
   const element = document.querySelector<T>(selector);
@@ -40,8 +41,51 @@ const compareQrInput = must<HTMLInputElement>("#compare-qr");
 const compareQrDrop = must<HTMLElement>("#compare-qr-drop");
 const compareQrLabel = must<HTMLElement>("#compare-qr-label");
 const spriteGrid = must<HTMLElement>("#sprite-grid");
+const tableScrollHint = must<HTMLElement>("#table-scroll-hint");
 const ownAllShownButton = must<HTMLButtonElement>("#own-all-shown");
 const masterAllShownButton = must<HTMLButtonElement>("#master-all-shown");
+const backToTopButton = must<HTMLButtonElement>("#back-to-top");
+const filtersTarget = must<HTMLElement>("#filters");
+const introSection = must<HTMLElement>("#intro-section");
+const introControls = must<HTMLElement>("#intro-controls");
+const introToggle = must<HTMLButtonElement>("#intro-toggle");
+
+function updateBackToTop(): void {
+  const visible = filtersTarget.getBoundingClientRect().top < -400;
+  backToTopButton.classList.toggle("is-visible", visible);
+  backToTopButton.setAttribute("aria-hidden", String(!visible));
+  backToTopButton.tabIndex = visible ? 0 : -1;
+}
+
+backToTopButton.addEventListener("click", () => {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  filtersTarget.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
+});
+window.addEventListener("scroll", updateBackToTop, { passive: true });
+updateBackToTop();
+
+function loadIntroExpanded(): boolean {
+  try {
+    return localStorage.getItem(INTRO_STORAGE_KEY) !== "collapsed";
+  } catch {
+    return true;
+  }
+}
+
+function setIntroExpanded(expanded: boolean, persist = true): void {
+  introSection.hidden = !expanded;
+  introControls.classList.toggle("is-collapsed", !expanded);
+  introToggle.setAttribute("aria-expanded", String(expanded));
+  const label = introToggle.querySelector("span");
+  if (label) label.textContent = expanded ? "Hide intro" : "Show intro";
+  if (persist) {
+    try { localStorage.setItem(INTRO_STORAGE_KEY, expanded ? "expanded" : "collapsed") } catch { /* Preference is optional. */ }
+  }
+  updateBackToTop();
+}
+
+introToggle.addEventListener("click", () => setIntroExpanded(introSection.hidden));
+setIntroExpanded(loadIntroExpanded(), false);
 
 function loadView(): ViewMode {
   try {
@@ -49,6 +93,12 @@ function loadView(): ViewMode {
   } catch {
     return "cards";
   }
+}
+
+function updateTableScrollHint(): void {
+  const isTable = spriteGrid.classList.contains("is-table");
+  const hasOverflow = spriteGrid.scrollWidth > spriteGrid.clientWidth + 16;
+  tableScrollHint.hidden = !isTable || !hasOverflow;
 }
 
 function setView(view: ViewMode, persist = true): void {
@@ -61,10 +111,13 @@ function setView(view: ViewMode, persist = true): void {
     button.classList.toggle("is-active", active);
     button.setAttribute("aria-pressed", String(active));
   });
+  updateTableScrollHint();
   if (persist) {
     try { localStorage.setItem(VIEW_STORAGE_KEY, view) } catch { /* Preference is optional. */ }
   }
 }
+
+window.addEventListener("resize", updateTableScrollHint);
 
 function cleanIds(values: unknown): number[] {
   if (!Array.isArray(values)) return [];
