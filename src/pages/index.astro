@@ -30,9 +30,9 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
 
 <Layout>
   <header class="site-header">
-    <a class="brand" href="/" aria-label="Sprite Sync home">
+    <a class="brand" href="/" aria-label="Fortnite Sprites home">
       <span class="brand-mark"><img src={"/sprites/" + logoSprite.id + ".webp"} alt="" width="44" height="44" /></span>
-      <span><strong>Sprite Sync</strong><small>Fortnite collection tracker</small></span>
+      <span><strong>Fortnite Sprites</strong><small>Collection tracker</small></span>
     </a>
     <nav class="header-actions" aria-label="Collection actions">
       <button class="button button-ghost" id="open-compare" type="button" data-testid="open-compare">
@@ -216,9 +216,9 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
       <button class="modal-close" value="cancel" aria-label="Close comparison dialog"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
       <span class="section-kicker">Compare collections</span><h2>Paste a friend’s link</h2>
       <p class="modal-description">Their collection stays read-only. Your own ticks remain editable and saved here.</p>
-      <label class="field-label" for="compare-url">Sprite Sync link</label>
+      <label class="field-label" for="compare-url">Fortnite Sprites link</label>
       <textarea class="field-input" id="compare-url" rows="3" placeholder="https://…#c=…"></textarea>
-      <p class="field-error" id="compare-error" hidden>That doesn’t look like a Sprite Sync collection link.</p>
+      <p class="field-error" id="compare-error" hidden>That doesn’t look like a Fortnite Sprites collection link.</p>
       <button class="button button-primary button-wide" id="load-comparison" type="button">Compare collections</button>
     </form>
   </dialog>

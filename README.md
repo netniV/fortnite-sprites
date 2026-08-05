@@ -1,4 +1,4 @@
-# Sprite Sync
+# Fortnite Sprites
 
 An Astro-based Fortnite Sprite collection tracker. Selections are stored in the
 browser and shared as compact URL fragments for side-by-side comparison.

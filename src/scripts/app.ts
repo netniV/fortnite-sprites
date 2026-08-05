@@ -1,7 +1,7 @@
 type SavedCollection = { owned?: number[]; mastered?: number[]; name?: string };
 type SharedCollection = { owned: Set<number>; mastered: Set<number>; name: string };
 
-const STORAGE_KEY = "sprite-sync-collection-v1";
+const STORAGE_KEY = "fortnite-sprites-collection-v1";
 
 function must<T extends Element>(selector: string): T {
   const element = document.querySelector<T>(selector);
