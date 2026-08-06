@@ -1,7 +1,7 @@
 import QRCode from "qrcode";
+import { buildShareParams, parseSharedLink, type SharedCollection } from "./share-codec";
 
 type SavedCollection = { owned?: number[]; mastered?: number[]; name?: string };
-type SharedCollection = { owned: Set<number>; mastered: Set<number>; name: string };
 type ViewMode = "cards" | "table";
 
 const STORAGE_KEY = "fortnite-sprites-collection-v1";
@@ -147,29 +147,9 @@ function saveCollection(): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
 }
 
-function encodeIds(ids: Set<number>): string {
-  return [...ids]
-    .filter((id) => releasedIds.has(id))
-    .sort((a, b) => a - b)
-    .map((id) => id.toString(36))
-    .join(".");
-}
-
-function decodeIds(value: string | null): Set<number> {
-  if (!value) return new Set();
-  return new Set(
-    value.split(".").map((id) => Number.parseInt(id, 36))
-      .filter((id) => Number.isInteger(id) && releasedIds.has(id)),
-  );
-}
-
 function buildShareUrl(): string {
   const url = new URL(window.location.origin + window.location.pathname);
-  const params = new URLSearchParams();
-  params.set("c", encodeIds(owned));
-  if (mastered.size) params.set("m", encodeIds(mastered));
-  const name = shareNameInput.value.trim();
-  if (name) params.set("n", name);
+  const params = buildShareParams(owned, mastered, shareNameInput.value.trim(), releasedIds);
   url.hash = params.toString();
   return url.toString();
 }
@@ -190,23 +170,6 @@ async function updateShareLink(): Promise<void> {
     shareQr.hidden = true;
   } finally {
     shareQr.removeAttribute("aria-busy");
-  }
-}
-
-function parseSharedLink(input: string): SharedCollection | null {
-  try {
-    let fragment = input.trim();
-    if (fragment.includes("#")) fragment = fragment.slice(fragment.indexOf("#") + 1);
-    if (fragment.startsWith("#")) fragment = fragment.slice(1);
-    const params = new URLSearchParams(fragment);
-    if (!params.has("c")) return null;
-    return {
-      owned: decodeIds(params.get("c")),
-      mastered: decodeIds(params.get("m")),
-      name: (params.get("n") || "Friend").slice(0, 32),
-    };
-  } catch {
-    return null;
   }
 }
 
@@ -233,7 +196,7 @@ async function decodeQrImage(file: File): Promise<string | null> {
 }
 
 function loadSharedLink(input: string): boolean {
-  const parsed = parseSharedLink(input);
+  const parsed = parseSharedLink(input, releasedIds);
   if (!parsed) return false;
   compareError.hidden = true;
   compareDialog.close();
@@ -266,10 +229,7 @@ async function loadQrFile(file: File): Promise<void> {
 
 function setHashFromShared(): void {
   if (!shared) return;
-  const params = new URLSearchParams();
-  params.set("c", encodeIds(shared.owned));
-  if (shared.mastered.size) params.set("m", encodeIds(shared.mastered));
-  if (shared.name && shared.name !== "Friend") params.set("n", shared.name);
+  const params = buildShareParams(shared.owned, shared.mastered, shared.name, releasedIds);
   history.replaceState(null, "", location.pathname + location.search + "#" + params.toString());
 }
 
@@ -448,7 +408,7 @@ async function copyText(text: string): Promise<void> {
 const saved = loadSavedCollection();
 shareNameInput.value = typeof saved.name === "string" ? saved.name.slice(0, 32) : "";
 setView(loadView(), false);
-const initialShared = parseSharedLink(location.hash);
+const initialShared = parseSharedLink(location.hash, releasedIds);
 if (initialShared) setShared(initialShared, false);
 else render();
 

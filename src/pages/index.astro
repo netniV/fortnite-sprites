@@ -255,7 +255,7 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
         </div>
         <figcaption><strong>Scan to compare</strong><span>Open your phone’s camera and point it at the code.</span></figcaption>
       </figure>
-      <p class="privacy-note"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>The link contains sprite IDs only—no account or personal data.</p>
+      <p class="privacy-note"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>The link contains your collection and optional display name—no account data.</p>
     </form>
   </dialog>
 
@@ -266,7 +266,7 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
       <span class="section-kicker">Compare collections</span><h2>Use a link or QR code</h2>
       <p class="modal-description">Their collection stays read-only. Your own ticks remain editable and saved here.</p>
       <label class="field-label" for="compare-url">Fortnite Sprites link</label>
-      <textarea class="field-input" id="compare-url" rows="3" placeholder="https://…#c=…"></textarea>
+      <textarea class="field-input" id="compare-url" rows="3" placeholder="https://…#s=…"></textarea>
       <div class="compare-divider"><span>or use a QR image</span></div>
       <div class="qr-upload" id="compare-qr-drop" aria-live="polite">
         <input id="compare-qr" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Choose a QR code image" />
