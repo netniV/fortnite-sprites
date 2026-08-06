@@ -294,10 +294,14 @@ function updateSummary(): void {
     const theirsOnly = theirCount - both;
     const unique = mineOnly + theirsOnly;
     const neither = total - both - unique;
+    const differences = [...releasedIds].filter((id) =>
+      owned.has(id) !== shared?.owned.has(id) || mastered.has(id) !== shared?.mastered.has(id)
+    ).length;
     must("#comparison-mine").textContent = String(ownedCount);
     must("#comparison-theirs").textContent = String(theirCount);
     must("#comparison-both").textContent = String(both);
     must("#comparison-unique").textContent = String(unique);
+    must("#filter-comparison-differences-count").textContent = String(differences);
     must("#filter-comparison-both-count").textContent = String(both);
     must("#filter-comparison-mine-only-count").textContent = String(mineOnly);
     must("#filter-comparison-theirs-only-count").textContent = String(theirsOnly);
@@ -312,10 +316,12 @@ function matchesFilters(card: HTMLElement): boolean {
   const isOwned = owned.has(id);
   const isMastered = mastered.has(id);
   const theirs = Boolean(shared?.owned.has(id));
+  const theirsMastered = Boolean(shared?.mastered.has(id));
   if (isUnreleased && !showUnreleased) return false;
   if (query && !card.dataset.name?.includes(query)) return false;
   if (activeVariant !== "all" && card.dataset.variant !== activeVariant) return false;
   if (shared) {
+    if (activeComparison === "differences" && isOwned === theirs && isMastered === theirsMastered) return false;
     if (activeComparison === "both" && !(isOwned && theirs)) return false;
     if (activeComparison === "mine-only" && !(isOwned && !theirs)) return false;
     if (activeComparison === "theirs-only" && !(!isOwned && theirs)) return false;
@@ -372,6 +378,7 @@ function setShared(next: SharedCollection | null, updateHash = true): void {
   must<HTMLElement>("#comparison-panel").hidden = !shared;
   must<HTMLElement>("#comparison-filters").hidden = !shared;
   must<HTMLElement>("#collection-filters").hidden = Boolean(shared);
+  must("#status-filter-label").textContent = shared ? "Compare" : "Status";
   must("#comparison-name").textContent = shared?.name || "Friend";
   must("#open-compare span").textContent = shared ? "Change comparison" : "Compare";
   document.querySelectorAll<HTMLButtonElement>("[data-comparison]").forEach((button) => {

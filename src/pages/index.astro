@@ -107,36 +107,44 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
 
     <section class="collection-surface" id="filters">
       <div class="collection-toolbar">
-        <div class="search-wrap">
-          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>
-          <input id="search" type="search" placeholder="Search sprites…" autocomplete="off" data-testid="search" /><kbd>/</kbd>
+        <div class="toolbar-search-row">
+          <div class="search-wrap">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>
+            <input id="search" type="search" placeholder="Search sprites…" autocomplete="off" data-testid="search" /><kbd>/</kbd>
+          </div>
+          <label class="switch-control"><input id="show-unreleased" type="checkbox" /><span></span>Preview unreleased</label>
         </div>
-        <div class="filter-row" id="collection-filters" aria-label="Collection status">
-          <span class="filter-label">Show</span>
-          <button class="filter-chip is-active" type="button" data-status="all" aria-pressed="true">All</button>
-          <button class="filter-chip" type="button" data-status="owned" aria-pressed="false">Owned <span class="filter-count" id="filter-owned-count">0</span></button>
-          <button class="filter-chip" type="button" data-status="not-owned" aria-pressed="false">Not owned <span class="filter-count" id="filter-not-owned-count">{released.length}</span></button>
-          <button class="filter-chip" type="button" data-status="mastered" aria-pressed="false">Mastered <span class="filter-count" id="filter-mastered-count">0</span></button>
-          <button class="filter-chip" type="button" data-status="not-mastered" aria-pressed="false">Not mastered <span class="filter-count" id="filter-not-mastered-count">0</span></button>
+        <div class="filter-stack">
+          <div class="filter-group">
+            <span class="filter-label" id="status-filter-label">Status</span>
+            <div class="filter-row" id="collection-filters" role="group" aria-labelledby="status-filter-label">
+              <button class="filter-chip is-active" type="button" data-status="all" aria-pressed="true">All</button>
+              <button class="filter-chip" type="button" data-status="owned" aria-pressed="false">Owned <span class="filter-count" id="filter-owned-count">0</span></button>
+              <button class="filter-chip" type="button" data-status="not-owned" aria-pressed="false">Not owned <span class="filter-count" id="filter-not-owned-count">{released.length}</span></button>
+              <button class="filter-chip" type="button" data-status="mastered" aria-pressed="false">Mastered <span class="filter-count" id="filter-mastered-count">0</span></button>
+              <button class="filter-chip" type="button" data-status="not-mastered" aria-pressed="false">Not mastered <span class="filter-count" id="filter-not-mastered-count">0</span></button>
+            </div>
+            <div class="filter-row" id="comparison-filters" role="group" aria-labelledby="status-filter-label" hidden>
+              <button class="filter-chip is-active" type="button" data-comparison="all" aria-pressed="true">All</button>
+              <button class="filter-chip filter-chip-differences" type="button" data-comparison="differences" aria-pressed="false">Differences <span class="filter-count" id="filter-comparison-differences-count">0</span></button>
+              <button class="filter-chip" type="button" data-comparison="both" aria-pressed="false">Both <span class="filter-count" id="filter-comparison-both-count">0</span></button>
+              <button class="filter-chip" type="button" data-comparison="mine-only" aria-pressed="false">Only you <span class="filter-count" id="filter-comparison-mine-only-count">0</span></button>
+              <button class="filter-chip" type="button" data-comparison="theirs-only" aria-pressed="false">Only them <span class="filter-count" id="filter-comparison-theirs-only-count">0</span></button>
+              <button class="filter-chip" type="button" data-comparison="neither" aria-pressed="false">Neither <span class="filter-count" id="filter-comparison-neither-count">0</span></button>
+            </div>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label" id="variant-filter-label">Variant</span>
+            <div class="variant-scroller" role="group" aria-labelledby="variant-filter-label">
+              <button class="variant-chip is-active" type="button" data-variant="all" aria-pressed="true"><span class="variant-swatch swatch-all"></span>All variants</button>
+              {variants.map((variant) => (
+                <button class="variant-chip" type="button" data-variant={variant} aria-pressed="false">
+                  <span class={"variant-swatch swatch-" + variant}></span>{variantLabels[variant]}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-        <div class="filter-row" id="comparison-filters" aria-label="Comparison status" hidden>
-          <span class="filter-label">Show</span>
-          <button class="filter-chip is-active" type="button" data-comparison="all" aria-pressed="true">All</button>
-          <button class="filter-chip" type="button" data-comparison="both" aria-pressed="false">Both <span class="filter-count" id="filter-comparison-both-count">0</span></button>
-          <button class="filter-chip" type="button" data-comparison="mine-only" aria-pressed="false">Only you <span class="filter-count" id="filter-comparison-mine-only-count">0</span></button>
-          <button class="filter-chip" type="button" data-comparison="theirs-only" aria-pressed="false">Only them <span class="filter-count" id="filter-comparison-theirs-only-count">0</span></button>
-          <button class="filter-chip" type="button" data-comparison="neither" aria-pressed="false">Neither <span class="filter-count" id="filter-comparison-neither-count">0</span></button>
-        </div>
-        <label class="switch-control"><input id="show-unreleased" type="checkbox" /><span></span>Preview unreleased</label>
-      </div>
-
-      <div class="variant-scroller" aria-label="Sprite variants">
-        <button class="variant-chip is-active" type="button" data-variant="all" aria-pressed="true"><span class="variant-swatch swatch-all"></span>All variants</button>
-        {variants.map((variant) => (
-          <button class="variant-chip" type="button" data-variant={variant} aria-pressed="false">
-            <span class={"variant-swatch swatch-" + variant}></span>{variantLabels[variant]}
-          </button>
-        ))}
       </div>
 
       <div class="results-heading">
