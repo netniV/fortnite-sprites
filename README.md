@@ -25,6 +25,6 @@ production site after pushes to `main` and create preview deployments for pull
 requests.
 
 The catalog and artwork were captured from the public
-[Fortnite.GG Sprite catalog](https://fortnite.gg/sprites) on 4 August 2026.
+[Fortnite.GG Sprite catalog](https://fortnite.gg/sprites) on 6 August 2026.
 Fortnite and its assets are trademarks of Epic Games. This fan project is not
 affiliated with Epic Games or Fortnite.GG.

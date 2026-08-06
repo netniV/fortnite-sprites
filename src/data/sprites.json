@@ -126,7 +126,7 @@
     "name": "Gem Water",
     "rarity": "special",
     "unlockRate": "0.37%",
-    "unreleased": true,
+    "unreleased": false,
     "variant": "gem"
   },
   {
@@ -206,7 +206,7 @@
     "name": "Gem Earth",
     "rarity": "special",
     "unlockRate": "0.37%",
-    "unreleased": true,
+    "unreleased": false,
     "variant": "gem"
   },
   {
@@ -326,7 +326,7 @@
     "name": "Gem Duck",
     "rarity": "special",
     "unlockRate": "0.1%",
-    "unreleased": true,
+    "unreleased": false,
     "variant": "gem"
   },
   {
@@ -476,7 +476,7 @@
     "name": "Gem Demon",
     "rarity": "special",
     "unlockRate": "0.1%",
-    "unreleased": true,
+    "unreleased": false,
     "variant": "gem"
   },
   {
@@ -676,7 +676,7 @@
     "name": "Gem Zero Point",
     "rarity": "special",
     "unlockRate": "0.00001%",
-    "unreleased": true,
+    "unreleased": false,
     "variant": "gem"
   },
   {
@@ -836,7 +836,7 @@
     "name": "Gem Aura",
     "rarity": "special",
     "unlockRate": "0.08%",
-    "unreleased": true,
+    "unreleased": false,
     "variant": "gem"
   },
   {
@@ -946,7 +946,7 @@
     "name": "Gem Grim",
     "rarity": "special",
     "unlockRate": "0.00099%",
-    "unreleased": true,
+    "unreleased": false,
     "variant": "gem"
   },
   {
@@ -1066,7 +1066,7 @@
     "name": "Ironmouse",
     "rarity": "mythic",
     "unlockRate": "2.14%",
-    "unreleased": true,
+    "unreleased": false,
     "variant": "base"
   },
   {
