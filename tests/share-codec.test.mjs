@@ -6,6 +6,7 @@ import {
   encodePackedCollection,
   parseSharedLink,
 } from "../src/scripts/share-codec.ts";
+import { buildSharePreview } from "../src/scripts/share-preview.ts";
 
 const validIds = new Set([1, 4, 84, 138, 160]);
 
@@ -32,13 +33,16 @@ test("mastered sprites are treated as owned", () => {
   assert.deepEqual(sorted(decoded.mastered), [4]);
 });
 
-test("new share fragments preserve display names", () => {
+test("new share links preserve display names in queries and fragments", () => {
   const params = buildShareParams(new Set([1, 84]), new Set([84]), "Jonesy & Peely", validIds);
-  const parsed = parseSharedLink(`https://sprites.example/#${params}`, validIds);
+  const queryParsed = parseSharedLink(`https://sprites.example/?${params}`, validIds);
+  const fragmentParsed = parseSharedLink(`https://sprites.example/#${params}`, validIds);
 
-  assert.equal(parsed.name, "Jonesy & Peely");
-  assert.deepEqual(sorted(parsed.owned), [1, 84]);
-  assert.deepEqual(sorted(parsed.mastered), [84]);
+  for (const parsed of [queryParsed, fragmentParsed]) {
+    assert.equal(parsed.name, "Jonesy & Peely");
+    assert.deepEqual(sorted(parsed.owned), [1, 84]);
+    assert.deepEqual(sorted(parsed.mastered), [84]);
+  }
 });
 
 test("original c/m links remain supported", () => {
@@ -69,4 +73,18 @@ test("packed all-selected payload is substantially shorter than the legacy form"
   const legacy = new URLSearchParams({ c: legacyIds, m: legacyIds }).toString();
 
   assert.ok(packed.length < legacy.length / 4, `${packed.length} should be less than a quarter of ${legacy.length}`);
+});
+
+test("shared preview includes owned, mastered, and completion stats", () => {
+  const preview = buildSharePreview({
+    owned: new Set([1, 4, 84]),
+    mastered: new Set([4]),
+    name: "Jonesy",
+  }, 5);
+
+  assert.equal(preview.title, "Jonesy’s Fortnite Sprites — 3/5 owned");
+  assert.equal(
+    preview.description,
+    "3 of 5 Sprites owned · 1 mastered · 60% complete. Compare your collection with Jonesy.",
+  );
 });

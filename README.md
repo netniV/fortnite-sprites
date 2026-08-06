@@ -1,8 +1,9 @@
 # Fortnite Sprites
 
 An Astro-based Fortnite Sprite collection tracker. Selections are stored in the
-browser and shared as compact, tagged URL fragments for side-by-side comparison.
-Links using the original `#c=…&m=…` format remain supported.
+browser and shared as compact, tagged query parameters for side-by-side comparison
+and collection-aware social previews. Links using the previous fragment formats
+remain supported.
 
 ## Commands
 
@@ -20,6 +21,10 @@ Import this GitHub repository into Cloudflare Pages and use these settings:
 - Framework preset: `Astro`
 - Build command: `pnpm run build`
 - Build output directory: `dist`
+
+The root `functions/index.ts` Pages Function adds collection stats to link-preview
+metadata when a shared URL is requested. It is deployed automatically alongside
+the static build by Cloudflare Pages.
 
 Node.js 22 is pinned in `.node-version`. Cloudflare Pages will rebuild the
 production site after pushes to `main` and create preview deployments for pull

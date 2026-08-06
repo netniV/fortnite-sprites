@@ -148,9 +148,11 @@ function saveCollection(): void {
 }
 
 function buildShareUrl(): string {
-  const url = new URL(window.location.origin + window.location.pathname);
+  const url = new URL(window.location.href);
   const params = buildShareParams(owned, mastered, shareNameInput.value.trim(), releasedIds);
-  url.hash = params.toString();
+  for (const key of ["s", "c", "m", "n"]) url.searchParams.delete(key);
+  for (const [key, value] of params) url.searchParams.set(key, value);
+  url.hash = "";
   return url.toString();
 }
 
@@ -227,10 +229,21 @@ async function loadQrFile(file: File): Promise<void> {
   }
 }
 
-function setHashFromShared(): void {
+function setUrlFromShared(): void {
   if (!shared) return;
   const params = buildShareParams(shared.owned, shared.mastered, shared.name, releasedIds);
-  history.replaceState(null, "", location.pathname + location.search + "#" + params.toString());
+  const url = new URL(location.href);
+  for (const key of ["s", "c", "m", "n"]) url.searchParams.delete(key);
+  for (const [key, value] of params) url.searchParams.set(key, value);
+  url.hash = "";
+  history.replaceState(null, "", url.pathname + url.search);
+}
+
+function clearSharedUrl(): void {
+  const url = new URL(location.href);
+  for (const key of ["s", "c", "m", "n"]) url.searchParams.delete(key);
+  url.hash = "";
+  history.replaceState(null, "", url.pathname + url.search);
 }
 
 function updateCard(card: HTMLElement): void {
@@ -372,7 +385,7 @@ function render(): void {
   saveCollection();
 }
 
-function setShared(next: SharedCollection | null, updateHash = true): void {
+function setShared(next: SharedCollection | null, updateUrl = true): void {
   shared = next;
   activeComparison = "all";
   must<HTMLElement>("#comparison-panel").hidden = !shared;
@@ -386,9 +399,9 @@ function setShared(next: SharedCollection | null, updateHash = true): void {
     button.classList.toggle("is-active", active);
     button.setAttribute("aria-pressed", String(active));
   });
-  if (updateHash) {
-    if (shared) setHashFromShared();
-    else history.replaceState(null, "", location.pathname + location.search);
+  if (updateUrl) {
+    if (shared) setUrlFromShared();
+    else clearSharedUrl();
   }
   render();
 }
@@ -415,8 +428,8 @@ async function copyText(text: string): Promise<void> {
 const saved = loadSavedCollection();
 shareNameInput.value = typeof saved.name === "string" ? saved.name.slice(0, 32) : "";
 setView(loadView(), false);
-const initialShared = parseSharedLink(location.hash, releasedIds);
-if (initialShared) setShared(initialShared, false);
+const initialShared = parseSharedLink(location.href, releasedIds);
+if (initialShared) setShared(initialShared);
 else render();
 
 for (const card of cards) {

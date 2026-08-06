@@ -134,10 +134,29 @@ export function buildShareParams(
 
 export function parseSharedLink(input: string, validIds: Set<number>): SharedCollection | null {
   try {
-    let fragment = input.trim();
-    if (fragment.includes("#")) fragment = fragment.slice(fragment.indexOf("#") + 1);
-    if (fragment.startsWith("#")) fragment = fragment.slice(1);
-    const params = new URLSearchParams(fragment);
+    const value = input.trim();
+    if (!value) return null;
+
+    const hasCollection = (params: URLSearchParams) => params.has("s") || params.has("c");
+    let params: URLSearchParams | null = null;
+    const queryStart = value.indexOf("?");
+    const hashStart = value.indexOf("#");
+
+    if (queryStart >= 0) {
+      const queryEnd = hashStart > queryStart ? hashStart : value.length;
+      const queryParams = new URLSearchParams(value.slice(queryStart + 1, queryEnd));
+      if (hasCollection(queryParams)) params = queryParams;
+    }
+    if (!params && hashStart >= 0) {
+      const hashParams = new URLSearchParams(value.slice(hashStart + 1));
+      if (hasCollection(hashParams)) params = hashParams;
+    }
+    if (!params) {
+      const rawParams = new URLSearchParams(value.replace(/^[?#]/, ""));
+      if (hasCollection(rawParams)) params = rawParams;
+    }
+    if (!params) return null;
+
     const name = (params.get("n") || "Friend").slice(0, 32);
     const packed = params.get("s");
     if (packed !== null) {
