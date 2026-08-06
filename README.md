@@ -13,20 +13,19 @@ remain supported.
 - `pnpm run build` — build the static site
 - `pnpm run preview` — preview the production build
 
-## Deploy to Cloudflare Pages
+## Deploy to Cloudflare Workers
 
-Import this GitHub repository into Cloudflare Pages and use these settings:
+Connect this GitHub repository to a Cloudflare Workers Build and use these settings:
 
 - Production branch: `main`
-- Framework preset: `Astro`
 - Build command: `pnpm run build`
-- Build output directory: `dist`
+- Deploy command: `npx wrangler deploy`
 
-The root `functions/index.ts` Pages Function adds collection stats to link-preview
-metadata when a shared URL is requested. It is deployed automatically alongside
-the static build by Cloudflare Pages.
+The `wrangler.jsonc` configuration deploys the Astro output as Worker static assets
+and runs `src/worker.ts` before the homepage asset. The Worker adds collection stats
+to link-preview metadata when a shared URL is requested.
 
-Node.js 22 is pinned in `.node-version`. Cloudflare Pages will rebuild the
+Node.js 22 is pinned in `.node-version`. Cloudflare Workers will rebuild the
 production site after pushes to `main` and create preview deployments for pull
 requests.
 
