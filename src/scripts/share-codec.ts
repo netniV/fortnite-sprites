@@ -129,6 +129,7 @@ export function buildShareParams(
   const params = new URLSearchParams();
   params.set("s", encodePackedCollection(collectionOwned, collectionMastered, validIds));
   if (name && name !== "Friend") params.set("n", name);
+  params.set("v", "2");
   return params;
 }
 

@@ -35,6 +35,7 @@ test("mastered sprites are treated as owned", () => {
 
 test("new share links preserve display names in queries and fragments", () => {
   const params = buildShareParams(new Set([1, 84]), new Set([84]), "Jonesy & Peely", validIds);
+  assert.equal(params.get("v"), "2");
   const queryParsed = parseSharedLink(`https://sprites.example/?${params}`, validIds);
   const fragmentParsed = parseSharedLink(`https://sprites.example/#${params}`, validIds);
 

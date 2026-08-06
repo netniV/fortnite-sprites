@@ -150,7 +150,7 @@ function saveCollection(): void {
 function buildShareUrl(): string {
   const url = new URL(window.location.href);
   const params = buildShareParams(owned, mastered, shareNameInput.value.trim(), releasedIds);
-  for (const key of ["s", "c", "m", "n"]) url.searchParams.delete(key);
+  for (const key of ["s", "c", "m", "n", "v"]) url.searchParams.delete(key);
   for (const [key, value] of params) url.searchParams.set(key, value);
   url.hash = "";
   return url.toString();
@@ -233,7 +233,7 @@ function setUrlFromShared(): void {
   if (!shared) return;
   const params = buildShareParams(shared.owned, shared.mastered, shared.name, releasedIds);
   const url = new URL(location.href);
-  for (const key of ["s", "c", "m", "n"]) url.searchParams.delete(key);
+  for (const key of ["s", "c", "m", "n", "v"]) url.searchParams.delete(key);
   for (const [key, value] of params) url.searchParams.set(key, value);
   url.hash = "";
   history.replaceState(null, "", url.pathname + url.search);
@@ -241,7 +241,7 @@ function setUrlFromShared(): void {
 
 function clearSharedUrl(): void {
   const url = new URL(location.href);
-  for (const key of ["s", "c", "m", "n"]) url.searchParams.delete(key);
+  for (const key of ["s", "c", "m", "n", "v"]) url.searchParams.delete(key);
   url.hash = "";
   history.replaceState(null, "", url.pathname + url.search);
 }
