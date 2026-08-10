@@ -8,12 +8,6 @@ function decodeLegacyIds(value: string | null, validIds: Set<number>): Set<numbe
   );
 }
 
-function bytesToBase64Url(bytes: Uint8Array): string {
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
 function base64UrlToBytes(value: string): Uint8Array | null {
   if (!/^[A-Za-z0-9_-]*$/.test(value)) return null;
   try {
@@ -23,6 +17,19 @@ function base64UrlToBytes(value: string): Uint8Array | null {
   } catch {
     return null;
   }
+}
+
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function hexToBytes(value: string): Uint8Array | null {
+  if (!/^(?:[A-Fa-f0-9]{2})*$/.test(value)) return null;
+  const bytes = new Uint8Array(value.length / 2);
+  for (let index = 0; index < bytes.length; index += 1) {
+    bytes[index] = Number.parseInt(value.slice(index * 2, index * 2 + 2), 16);
+  }
+  return bytes;
 }
 
 function encodeDeltaCollection(
@@ -59,11 +66,9 @@ export function encodePackedCollection(
     const state = collectionMastered.has(id) ? 3 : 1;
     bitsetBytes[Math.floor(id / 4)] |= state << ((id % 4) * 2);
   }
-  const bitsetPayload = bytesToBase64Url(bitsetBytes);
-  const deltaPayload = bytesToBase64Url(
-    encodeDeltaCollection(selectedIds, collectionMastered),
-  );
-  return bitsetPayload.length <= deltaPayload.length ? "b" + bitsetPayload : "d" + deltaPayload;
+  const bitsetPayload = bytesToHex(bitsetBytes);
+  const deltaPayload = bytesToHex(encodeDeltaCollection(selectedIds, collectionMastered));
+  return bitsetPayload.length <= deltaPayload.length ? "h" + bitsetPayload : "x" + deltaPayload;
 }
 
 export function decodePackedCollection(
@@ -71,18 +76,22 @@ export function decodePackedCollection(
   validIds: Set<number>,
 ): Pick<SharedCollection, "owned" | "mastered"> | null {
   const encoding = value.slice(0, 1);
-  if (encoding !== "b" && encoding !== "d") return null;
+  const isBitset = encoding === "b" || encoding === "h";
+  const isDelta = encoding === "d" || encoding === "x";
+  if (!isBitset && !isDelta) return null;
   const payload = value.slice(1);
-  const bytes = base64UrlToBytes(payload);
+  const bytes = encoding === "h" || encoding === "x"
+    ? hexToBytes(payload)
+    : base64UrlToBytes(payload);
   if (!bytes) return null;
   const highestValidId = validIds.size ? Math.max(...validIds) : -1;
   const maximumBitsetBytes = highestValidId < 0 ? 0 : Math.floor(highestValidId / 4) + 1;
-  if (encoding === "b" && bytes.length > maximumBitsetBytes) return null;
-  if (encoding === "d" && bytes.length > validIds.size * 5) return null;
+  if (isBitset && bytes.length > maximumBitsetBytes) return null;
+  if (isDelta && bytes.length > validIds.size * 5) return null;
 
   const decodedOwned = new Set<number>();
   const decodedMastered = new Set<number>();
-  if (encoding === "d") {
+  if (isDelta) {
     let previousId = 0;
     for (let index = 0; index < bytes.length;) {
       let value = 0;
@@ -129,7 +138,7 @@ export function buildShareParams(
   const params = new URLSearchParams();
   params.set("s", encodePackedCollection(collectionOwned, collectionMastered, validIds));
   if (name && name !== "Friend") params.set("n", name);
-  params.set("v", "2");
+  params.set("v", "3");
   return params;
 }
 

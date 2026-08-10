@@ -20,7 +20,7 @@ test("packed collections round-trip owned and mastered states", () => {
   const encoded = encodePackedCollection(owned, mastered, validIds);
   const decoded = decodePackedCollection(encoded, validIds);
 
-  assert.match(encoded, /^[bd][A-Za-z0-9_-]+$/);
+  assert.match(encoded, /^[hx][0-9a-f]+$/);
   assert.deepEqual(sorted(decoded.owned), sorted(owned));
   assert.deepEqual(sorted(decoded.mastered), sorted(mastered));
 });
@@ -35,7 +35,7 @@ test("mastered sprites are treated as owned", () => {
 
 test("new share links preserve display names in queries and fragments", () => {
   const params = buildShareParams(new Set([1, 84]), new Set([84]), "Jonesy & Peely", validIds);
-  assert.equal(params.get("v"), "2");
+  assert.equal(params.get("v"), "3");
   const queryParsed = parseSharedLink(`https://sprites.example/?${params}`, validIds);
   const fragmentParsed = parseSharedLink(`https://sprites.example/#${params}`, validIds);
 
@@ -67,6 +67,26 @@ test("the reported 103-sprite link preserves every mastered state", () => {
   assert.deepEqual(sorted(parsed.mastered), sorted(sharedIds));
 });
 
+test("new transport-safe links preserve the complete 103-sprite collection", () => {
+  const sharedIds = new Set([
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+    20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 36, 37, 38, 39, 40,
+    41, 42, 43, 44, 45, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+    60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 71, 72, 73, 74, 75, 76, 77, 78,
+    79, 84, 86, 87, 89, 90, 99, 106, 113, 116, 126, 129, 138, 139, 140, 141,
+    142, 145, 146, 148, 149, 150, 151, 152, 153, 154, 156, 157, 158, 160,
+  ]);
+  const params = buildShareParams(sharedIds, sharedIds, "netniV", sharedIds);
+  const parsed = parseSharedLink(`https://sprites.example/?${params}`, sharedIds);
+
+  assert.equal(params.get("v"), "3");
+  assert.match(params.get("s"), /^[hx][0-9a-f]+$/);
+  assert.equal(parsed.owned.size, 103);
+  assert.equal(parsed.mastered.size, 103);
+  assert.deepEqual(sorted(parsed.owned), sorted(sharedIds));
+  assert.deepEqual(sorted(parsed.mastered), sorted(sharedIds));
+});
+
 test("original c/m links remain supported", () => {
   const parsed = parseSharedLink("https://sprites.example/#c=1.2c.46&m=2c&n=Legacy", validIds);
 
@@ -84,7 +104,7 @@ test("invalid or oversized packed payloads are rejected", () => {
 test("sparse collections use the shorter delta representation", () => {
   const encoded = encodePackedCollection(new Set([160]), new Set(), validIds);
 
-  assert.match(encoded, /^d/);
+  assert.match(encoded, /^x/);
   assert.ok(encoded.length < 8);
 });
 
