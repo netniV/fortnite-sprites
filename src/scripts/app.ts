@@ -429,8 +429,19 @@ const saved = loadSavedCollection();
 shareNameInput.value = typeof saved.name === "string" ? saved.name.slice(0, 32) : "";
 setView(loadView(), false);
 const initialShared = parseSharedLink(location.href, releasedIds);
-if (initialShared) setShared(initialShared);
+if (initialShared) setShared(initialShared, false);
 else render();
+
+function syncSharedFromLocation(): void {
+  setShared(parseSharedLink(location.href, releasedIds), false);
+}
+
+// Embedded mobile browsers can restore this page from their back-forward cache
+// while changing the visible URL. Re-read the payload so the comparison always
+// matches the address bar instead of an older in-memory collection.
+window.addEventListener("pageshow", syncSharedFromLocation);
+window.addEventListener("popstate", syncSharedFromLocation);
+window.addEventListener("hashchange", syncSharedFromLocation);
 
 for (const card of cards) {
   card.addEventListener("click", (event) => {

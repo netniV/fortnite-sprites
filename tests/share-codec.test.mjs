@@ -46,6 +46,27 @@ test("new share links preserve display names in queries and fragments", () => {
   }
 });
 
+test("the reported 103-sprite link preserves every mastered state", () => {
+  const sharedIds = new Set([
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+    20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 36, 37, 38, 39, 40,
+    41, 42, 43, 44, 45, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+    60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 71, 72, 73, 74, 75, 76, 77, 78,
+    79, 84, 86, 87, 89, 90, 99, 106, 113, 116, 126, 129, 138, 139, 140, 141,
+    142, 145, 146, 148, 149, 150, 151, 152, 153, 154, 156, 157, 158, 160,
+  ]);
+  const parsed = parseSharedLink(
+    "https://fortnite-sprites.netniv.workers.dev/?s=b_P________8D__8________P__8A8zwAwAAwAAwDADAMAPA_PP8_PwM&n=netniV&v=2",
+    sharedIds,
+  );
+
+  assert.equal(parsed.name, "netniV");
+  assert.equal(parsed.owned.size, 103);
+  assert.equal(parsed.mastered.size, 103);
+  assert.deepEqual(sorted(parsed.owned), sorted(sharedIds));
+  assert.deepEqual(sorted(parsed.mastered), sorted(sharedIds));
+});
+
 test("original c/m links remain supported", () => {
   const parsed = parseSharedLink("https://sprites.example/#c=1.2c.46&m=2c&n=Legacy", validIds);
 
