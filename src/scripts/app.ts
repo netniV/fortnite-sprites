@@ -1,5 +1,6 @@
 import QRCode from "qrcode";
 import { buildShareParams, parseSharedLink, type SharedCollection } from "./share-codec";
+import { compareSprites, type SortMode, type SortableSprite } from "./sprite-sort";
 
 type SavedCollection = { owned?: number[]; mastered?: number[]; name?: string };
 type ViewMode = "cards" | "table";
@@ -7,6 +8,7 @@ type ViewMode = "cards" | "table";
 const STORAGE_KEY = "fortnite-sprites-collection-v1";
 const VIEW_STORAGE_KEY = "fortnite-sprites-view-v1";
 const INTRO_STORAGE_KEY = "fortnite-sprites-intro-v1";
+const SORT_STORAGE_KEY = "fortnite-sprites-sort-v1";
 
 function must<T extends Element>(selector: string): T {
   const element = document.querySelector<T>(selector);
@@ -49,6 +51,15 @@ const filtersTarget = must<HTMLElement>("#filters");
 const introSection = must<HTMLElement>("#intro-section");
 const introControls = must<HTMLElement>("#intro-controls");
 const introToggle = must<HTMLButtonElement>("#intro-toggle");
+const sortOrderInput = must<HTMLSelectElement>("#sort-order");
+
+const cardSortData = new Map<HTMLElement, SortableSprite>(cards.map((card) => [card, {
+  id: Number(card.dataset.id),
+  name: card.dataset.sortName || "",
+  base: card.dataset.sortBase || "",
+  variant: card.dataset.variant || "",
+  gameOrder: Number(card.dataset.gameOrder),
+}]));
 
 function updateBackToTop(): void {
   const visible = filtersTarget.getBoundingClientRect().top < -400;
@@ -118,6 +129,26 @@ function setView(view: ViewMode, persist = true): void {
 }
 
 window.addEventListener("resize", updateTableScrollHint);
+
+function loadSort(): SortMode {
+  try {
+    const savedSort = localStorage.getItem(SORT_STORAGE_KEY);
+    return savedSort === "name" || savedSort === "game" ? savedSort : "type";
+  } catch {
+    return "type";
+  }
+}
+
+function setSort(mode: SortMode, persist = true): void {
+  sortOrderInput.value = mode;
+  const sortedCards = [...cards].sort((left, right) =>
+    compareSprites(cardSortData.get(left)!, cardSortData.get(right)!, mode)
+  );
+  spriteGrid.append(...sortedCards);
+  if (persist) {
+    try { localStorage.setItem(SORT_STORAGE_KEY, mode) } catch { /* Preference is optional. */ }
+  }
+}
 
 function cleanIds(values: unknown): number[] {
   if (!Array.isArray(values)) return [];
@@ -428,6 +459,7 @@ async function copyText(text: string): Promise<void> {
 const saved = loadSavedCollection();
 shareNameInput.value = typeof saved.name === "string" ? saved.name.slice(0, 32) : "";
 setView(loadView(), false);
+setSort(loadSort(), false);
 const initialShared = parseSharedLink(location.href, releasedIds);
 if (initialShared) setShared(initialShared, false);
 else render();
@@ -514,6 +546,8 @@ document.querySelectorAll<HTMLButtonElement>(".variant-chip[data-variant]").forE
 document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((button) => {
   button.addEventListener("click", () => setView(button.dataset.view === "table" ? "table" : "cards"));
 });
+
+sortOrderInput.addEventListener("change", () => setSort(sortOrderInput.value as SortMode));
 
 function applyBulkAction(action: "owned" | "mastered"): void {
   const filteredIds = cards

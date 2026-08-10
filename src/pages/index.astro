@@ -1,8 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import catalog from "../data/sprites.json";
+import { compareSprites, normalizeVariant, variantOrder } from "../scripts/sprite-sort";
 
-const variantOrder = ["base", "cube", "gold", "quack", "gummy", "galaxy", "gem", "holofoil"];
 const variantLabels: Record<string, string> = {
   base: "Base",
   gold: "Gold",
@@ -13,13 +13,17 @@ const variantLabels: Record<string, string> = {
   cube: "Cube",
   quack: "Quack",
 };
+const gameOrderIds = [
+  139,
+  138,
+  ...catalog.filter((sprite) => sprite.id !== 139 && sprite.id !== 138).map((sprite) => sprite.id),
+];
+const gameOrderById = new Map(gameOrderIds.map((id, index) => [id, index]));
 const sprites = catalog.map((sprite) => ({
   ...sprite,
-  variant: sprite.variant === "candy" ? "gummy" : sprite.variant,
-})).sort((a, b) =>
-  a.base.localeCompare(b.base) ||
-  variantOrder.indexOf(a.variant) - variantOrder.indexOf(b.variant)
-);
+  variant: normalizeVariant(sprite.variant),
+  gameOrder: gameOrderById.get(sprite.id) ?? Number.MAX_SAFE_INTEGER,
+})).sort((a, b) => compareSprites(a, b, "type"));
 const released = sprites.filter((sprite) => !sprite.unreleased);
 const variants = variantOrder.filter((variant) => sprites.some((sprite) => sprite.variant === variant));
 const showcase = ["Water", "Gold Peely", "Galaxy Batman"]
@@ -150,6 +154,14 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
       <div class="results-heading">
         <div><h2>All sprites</h2><p><span id="visible-count">{released.length}</span> shown · click a <span id="item-view-label">card</span> to mark it owned</p></div>
         <div class="results-actions">
+          <label class="sort-control" for="sort-order">
+            <span>Sort by</span>
+            <select id="sort-order" data-testid="sort-order">
+              <option value="type">Type</option>
+              <option value="name">Name</option>
+              <option value="game">Game order</option>
+            </select>
+          </label>
           <div class="bulk-actions" role="group" aria-label="Bulk collection actions">
             <button class="bulk-button" id="own-all-shown" type="button" data-testid="own-all-shown">
               <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg><span>Own all shown</span>
@@ -186,6 +198,9 @@ const logoSprite = released.find((sprite) => sprite.name === "Water") ?? release
             class={"sprite-card rarity-" + sprite.rarity}
             data-id={sprite.id}
             data-name={(sprite.name + " " + sprite.base).toLowerCase()}
+            data-sort-name={sprite.name}
+            data-sort-base={sprite.base}
+            data-game-order={sprite.gameOrder}
             data-variant={sprite.variant}
             data-unreleased={String(sprite.unreleased)}
             hidden={sprite.unreleased}
