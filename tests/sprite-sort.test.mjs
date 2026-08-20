@@ -3,44 +3,44 @@ import test from "node:test";
 import { compareSprites, normalizeVariant } from "../src/scripts/sprite-sort.ts";
 
 const sprites = [
-  { id: 74, name: "Air", base: "Air", variant: "base", gameOrder: 70 },
-  { id: 42, name: "Gold Air", base: "Air", variant: "gold", gameOrder: 71 },
-  { id: 72, name: "Gummy Air", base: "Air", variant: "gummy", gameOrder: 72 },
-  { id: 1, name: "Water", base: "Water", variant: "base", gameOrder: 7 },
-  { id: 2, name: "Gummy Water", base: "Water", variant: "gummy", gameOrder: 10 },
+  { id: 194, name: "Storm Scout", base: "Storm Scout", variant: "base", gameOrder: 33 },
+  { id: 195, name: "Cheat Master Storm Scout", base: "Storm Scout", variant: "cheatmaster", gameOrder: 34 },
+  { id: 196, name: "Gold Storm Scout", base: "Storm Scout", variant: "gold", gameOrder: 35 },
+  { id: 161, name: "Jackrabbit", base: "Jackrabbit", variant: "base", gameOrder: 0 },
+  { id: 163, name: "Cheat Master Jackrabbit", base: "Jackrabbit", variant: "cheatmaster", gameOrder: 2 },
 ];
 
 test("name sort uses each sprite's full display name", () => {
   assert.deepEqual(
     [...sprites].sort((a, b) => compareSprites(a, b, "name")).map((sprite) => sprite.name),
-    ["Air", "Gold Air", "Gummy Air", "Gummy Water", "Water"],
+    ["Cheat Master Jackrabbit", "Cheat Master Storm Scout", "Gold Storm Scout", "Jackrabbit", "Storm Scout"],
   );
 });
 
 test("type sort groups sprite families and orders their variants", () => {
   assert.deepEqual(
     [...sprites].sort((a, b) => compareSprites(a, b, "type")).map((sprite) => sprite.name),
-    ["Air", "Gold Air", "Gummy Air", "Water", "Gummy Water"],
+    ["Jackrabbit", "Cheat Master Jackrabbit", "Storm Scout", "Cheat Master Storm Scout", "Gold Storm Scout"],
   );
 });
 
 test("game sort follows the explicit collection order instead of numeric IDs", () => {
   assert.deepEqual(
     [...sprites].sort((a, b) => compareSprites(a, b, "game")).map((sprite) => sprite.name),
-    ["Water", "Gummy Water", "Air", "Gold Air", "Gummy Air"],
+    ["Jackrabbit", "Cheat Master Jackrabbit", "Storm Scout", "Cheat Master Storm Scout", "Gold Storm Scout"],
   );
 });
 
-test("game order starts with Batman before John Wick as shown in Fortnite", () => {
+test("game order follows the live Season 4 catalog sequence", () => {
   const opening = [
-    { id: 138, name: "John Wick", base: "John Wick", variant: "base", gameOrder: 1 },
-    { id: 146, name: "Cube Batman", base: "Batman", variant: "cube", gameOrder: 2 },
-    { id: 139, name: "Batman", base: "Batman", variant: "base", gameOrder: 0 },
+    { id: 163, name: "Cheat Master Jackrabbit", base: "Jackrabbit", variant: "cheatmaster", gameOrder: 2 },
+    { id: 161, name: "Jackrabbit", base: "Jackrabbit", variant: "base", gameOrder: 0 },
+    { id: 162, name: "Gold Jackrabbit", base: "Jackrabbit", variant: "gold", gameOrder: 1 },
   ];
 
   assert.deepEqual(
     opening.sort((a, b) => compareSprites(a, b, "game")).map((sprite) => sprite.name),
-    ["Batman", "John Wick", "Cube Batman"],
+    ["Jackrabbit", "Gold Jackrabbit", "Cheat Master Jackrabbit"],
   );
 });
 

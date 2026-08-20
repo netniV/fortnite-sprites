@@ -1,5 +1,6 @@
 export const variantOrder = [
   "base",
+  "cheatmaster",
   "cube",
   "gold",
   "quack",

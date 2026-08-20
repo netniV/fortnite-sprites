@@ -29,7 +29,7 @@ Node.js 22 is pinned in `.node-version`. Cloudflare Workers will rebuild the
 production site after pushes to `main` and create preview deployments for pull
 requests.
 
-The catalog and artwork were captured from the public
-[Fortnite.GG Sprite catalog](https://fortnite.gg/sprites) on 6 August 2026.
+The Chapter 7 Season 4 catalog and artwork were captured from the public
+[Fortnite.GG Sprite catalog](https://fortnite.gg/sprites) on 20 August 2026.
 Fortnite and its assets are trademarks of Epic Games. This fan project is not
 affiliated with Epic Games or Fortnite.GG.

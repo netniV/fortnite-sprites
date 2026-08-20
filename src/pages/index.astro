@@ -5,6 +5,7 @@ import { compareSprites, normalizeVariant, variantOrder } from "../scripts/sprit
 
 const variantLabels: Record<string, string> = {
   base: "Base",
+  cheatmaster: "Cheat Master",
   gold: "Gold",
   gummy: "Gummy",
   galaxy: "Galaxy",
@@ -13,11 +14,7 @@ const variantLabels: Record<string, string> = {
   cube: "Cube",
   quack: "Quack",
 };
-const gameOrderIds = [
-  139,
-  138,
-  ...catalog.filter((sprite) => sprite.id !== 139 && sprite.id !== 138).map((sprite) => sprite.id),
-];
+const gameOrderIds = catalog.map((sprite) => sprite.id);
 const gameOrderById = new Map(gameOrderIds.map((id, index) => [id, index]));
 const sprites = catalog.map((sprite) => ({
   ...sprite,
@@ -26,10 +23,10 @@ const sprites = catalog.map((sprite) => ({
 })).sort((a, b) => compareSprites(a, b, "type"));
 const released = sprites.filter((sprite) => !sprite.unreleased);
 const variants = variantOrder.filter((variant) => sprites.some((sprite) => sprite.variant === variant));
-const showcase = ["Water", "Gold Peely", "Galaxy Batman"]
+const showcase = ["Jackrabbit", "Gold Klombo", "Cheat Master Sonic"]
   .map((name) => released.find((sprite) => sprite.name === name))
   .filter(Boolean) as typeof released;
-const logoSprite = released.find((sprite) => sprite.name === "Water") ?? released[0];
+const logoSprite = released.find((sprite) => sprite.name === "Jackrabbit") ?? released[0];
 ---
 
 <Layout>
