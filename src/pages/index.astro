@@ -6,6 +6,7 @@ import { compareSprites, normalizeVariant, variantOrder } from "../scripts/sprit
 const variantLabels: Record<string, string> = {
   base: "Base",
   cheatmaster: "Cheat Master",
+  hacker: "Loot Hacker",
   gold: "Gold",
   gummy: "Gummy",
   galaxy: "Galaxy",
@@ -23,7 +24,7 @@ const sprites = catalog.map((sprite) => ({
 })).sort((a, b) => compareSprites(a, b, "type"));
 const released = sprites.filter((sprite) => !sprite.unreleased);
 const variants = variantOrder.filter((variant) => sprites.some((sprite) => sprite.variant === variant));
-const showcase = ["Jackrabbit", "Gold Klombo", "Cheat Master Sonic"]
+const showcase = ["Mega Man", "Gold Onigiri", "Loot Hacker Crown"]
   .map((name) => released.find((sprite) => sprite.name === name))
   .filter(Boolean) as typeof released;
 const logoSprite = released.find((sprite) => sprite.name === "Jackrabbit") ?? released[0];
