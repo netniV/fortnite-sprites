@@ -7,6 +7,7 @@ const variantLabels: Record<string, string> = {
   base: "Base",
   cheatmaster: "Cheat Master",
   hacker: "Loot Hacker",
+  reaper: "Bounty Hunter",
   gold: "Gold",
   gummy: "Gummy",
   galaxy: "Galaxy",
@@ -24,7 +25,7 @@ const sprites = catalog.map((sprite) => ({
 })).sort((a, b) => compareSprites(a, b, "type"));
 const released = sprites.filter((sprite) => !sprite.unreleased);
 const variants = variantOrder.filter((variant) => sprites.some((sprite) => sprite.variant === variant));
-const showcase = ["Mega Man", "Gold Onigiri", "Loot Hacker Crown"]
+const showcase = ["Crash Bandicoot", "Loot Hacker Pond", "Bounty Hunter Crown"]
   .map((name) => released.find((sprite) => sprite.name === name))
   .filter(Boolean) as typeof released;
 const logoSprite = released.find((sprite) => sprite.name === "Jackrabbit") ?? released[0];
@@ -251,7 +252,7 @@ const logoSprite = released.find((sprite) => sprite.name === "Jackrabbit") ?? re
     </section>
 
     <footer>
-      <p>Catalog and artwork sourced from <a href="https://fortnite.gg/sprites" target="_blank" rel="noreferrer">Fortnite.GG</a>. Updated 6 August 2026.</p>
+      <p>Catalog and artwork sourced from <a href="https://fortnite.gg/sprites" target="_blank" rel="noreferrer">Fortnite.GG</a>. Updated 19 September 2026.</p>
       <p>Fan-made collection tool · Not affiliated with Epic Games</p>
     </footer>
   </main>
