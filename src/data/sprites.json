@@ -816,7 +816,7 @@
     "name": "Birthday",
     "rarity": "rare",
     "unlockRate": "0%",
-    "unreleased": true,
+    "unreleased": false,
     "variant": "base"
   },
   {
@@ -826,7 +826,7 @@
     "name": "Gold Birthday",
     "rarity": "special",
     "unlockRate": "0%",
-    "unreleased": true,
+    "unreleased": false,
     "variant": "gold"
   },
   {
@@ -836,7 +836,7 @@
     "name": "Cheat Master Birthday",
     "rarity": "special",
     "unlockRate": "0%",
-    "unreleased": true,
+    "unreleased": false,
     "variant": "cheatmaster"
   },
   {
@@ -846,7 +846,7 @@
     "name": "Loot Hacker Birthday",
     "rarity": "special",
     "unlockRate": "0%",
-    "unreleased": true,
+    "unreleased": false,
     "variant": "hacker"
   },
   {
@@ -856,7 +856,7 @@
     "name": "Bounty Hunter Birthday",
     "rarity": "special",
     "unlockRate": "0%",
-    "unreleased": true,
+    "unreleased": false,
     "variant": "reaper"
   },
   {
